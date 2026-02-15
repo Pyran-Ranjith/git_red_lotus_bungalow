@@ -272,7 +272,7 @@ $rooms = $stmt->fetchAll();
                                transition-all duration-300 
                                group overflow-hidden flex flex-col">
                         <div class="relative h-64 overflow-hidden">
-                            <img src="<?= $room['image'] ?>" class="room-img w-full h-full object-cover transition-transform duration-700" alt="<?= $room['name'] ?>">
+                            <img src="<?= $room['image'] ?>" class="room-img w-full h-full object-cover transition-transform duration-700" alt="<?= $room['name'] ?>(Image not found) ">
                             <div class="absolute top-4 right-4 bg-white text-richBlack font-bold px-3 py-1 text-xs uppercase tracking-wider rounded-sm">
                                 <!-- LKR 15,000 -->
                                  <p>Rs. <?= $room['price'] ?></p>
