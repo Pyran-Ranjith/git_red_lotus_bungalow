@@ -71,7 +71,7 @@ admin/uploads/
 #################################################
 
 # Local database exports
-*.sql
+# *.sql
 *.sqlite
 *.db
 
