@@ -1,4 +1,7 @@
 <?php
+require '../config/database.php';
+include '../includes/header.php';
+include '../includes/navbar.php';
 session_start();
 require '../config/database.php';
 
@@ -6,6 +9,9 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
     $stmt = $pdo->prepare("SELECT * FROM users WHERE username=?");
     $stmt->execute([$_POST['username']]);
     $user = $stmt->fetch();
+// echo $user['password'];
+// echo $_POST['password'];
+// To create a new hash:
 
     if($user && password_verify($_POST['password'], $user['password'])){
         $_SESSION['admin'] = $user['username'];
@@ -23,3 +29,5 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
     <input name="password" type="password" class="form-control mb-2" placeholder="Password">
     <button class="btn btn-danger w-100">Login</button>
 </form>
+
+<?php include '../includes/footer.php'; ?>

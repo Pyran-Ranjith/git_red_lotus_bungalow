@@ -1,4 +1,6 @@
 <?php
+include '../includes/header.php';
+include '../includes/navbar.php';
 session_start();
 require '../config/database.php';
 
@@ -19,3 +21,5 @@ $totalBookings = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
 <a href="manage_bookings.php">Manage Bookings</a><br>
 <a href="logout.php">Logout</a>
 </div>
+
+<?php include '../includes/footer.php'; ?>

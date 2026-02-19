@@ -152,8 +152,11 @@
                 <a href="#contact" class="text-white text-[0.85rem] font-extra uppercase tracking-widest hover:text-gold transition-colors font-medium ">Contact</a>
             </nav>
             <!-- <a href="/templates/booking.html" target="_blank" class="bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-2.5 rounded-none font-bold text-sm hover:from-gold hover:to-goldDark hover:text-white transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest"> -->
-             <a href="./booking.php" target="_blank" class="bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-2.5 rounded-none font-bold text-sm hover:from-gold hover:to-goldDark hover:text-white transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest">
+             <a href="./booking_front.php" target="_blank" class="bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-2.5 rounded-none font-bold text-sm hover:from-gold hover:to-goldDark hover:text-white transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest">
                BOOK NOW
+            </a>
+             <a href="./admin/dashboard.php" target="_blank" class="bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-2.5 rounded-none font-bold text-sm hover:from-gold hover:to-goldDark hover:text-white transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest">
+               Admin
             </a>
         </div>
     </header>
@@ -181,7 +184,7 @@
                 </p>
                 <div class="flex flex-col md:flex-row gap-5 justify-center">
                     <!-- <a href="/templates/booking.html" target="_blank" class="bg-gold text-white px-10 py-4 rounded-none font-bold tracking-[0.2em] hover:bg-white hover:text-lotusRed transition-all flex items-center justify-center gap-2 shadow-glow border border-gold hover:border-white uppercase text-xs md:text-sm"> -->
-                    <a href="./booking.html" target="_blank" class="bg-gold text-white px-10 py-4 rounded-none font-bold tracking-[0.2em] hover:bg-white hover:text-lotusRed transition-all flex items-center justify-center gap-2 shadow-glow border border-gold hover:border-white uppercase text-xs md:text-sm">
+                    <a href="./booking_front.php" target="_blank" class="bg-gold text-white px-10 py-4 rounded-none font-bold tracking-[0.2em] hover:bg-white hover:text-lotusRed transition-all flex items-center justify-center gap-2 shadow-glow border border-gold hover:border-white uppercase text-xs md:text-sm">
                         Check Availability 
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7"/></svg>
                     </a>
@@ -265,7 +268,7 @@ $rooms = $stmt->fetchAll();
 </div> -->
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- CARD 1: GARDEN SUITE -->
+                    <!-- CARD : -->
                     <div class="room-card bg-white rounded-lg shadow-lg 
                                hover:shadow-gold  
                                border-2 border-transparent 
