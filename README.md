@@ -1,4 +1,6 @@
-## Default Admin Login
+## link: http://localhost/git_red_lotus_bungalow/index.php
+
+# Default Admin Login
 Username: admin
 Password: admin123
 
