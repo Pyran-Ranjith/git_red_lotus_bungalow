@@ -1,11 +1,4 @@
 <?php
-/* Debug variables 
-echo '<pre>';
-var_dump($alert_type);
-var_dump($status);
-echo '</pre>';
-*/
-/* ********************************************* */ 
 include '../includes/header.php';
 include '../includes/navbar.php';
 require '../config/database.php';
@@ -14,15 +7,27 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$status = "";
-$alert_type = "";
+/* ================= DELETE ================= */
+if (isset($_GET['delete'])) {
+    $stmt = $pdo->prepare("DELETE FROM bookings WHERE id=?");
+    $stmt->execute([$_GET['delete']]);
+
+    $_SESSION['alert_type'] = "danger";
+    $_SESSION['status'] = "Booking deleted successfully!";
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+/* ================= ADD / UPDATE ================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     if (isset($_POST['add'])) {
+
         $stmt = $pdo->prepare("INSERT INTO bookings 
             (customer_name,email,phone,check_in,check_out,room_type,guests,message)
             VALUES (?,?,?,?,?,?,?,?)");
 
-        if ($stmt->execute([
+        $result = $stmt->execute([
             $_POST['name'],
             $_POST['email'],
             $_POST['phone'],
@@ -31,129 +36,191 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['room_type'],
             $_POST['guests'],
             $_POST['message']
-        ])) {
-            $_SESSION['alert_type'] = "success";
-            $_SESSION['status'] = "Booking Successfully Submitted!";
-        } else {
-            $alert_type = "error";
-            $_SESSION['status'] = "Booking Not Submitted! Something went wrong. Please try again!";
-        }
+        ]);
+
+        $_SESSION['alert_type'] = $result ? "success" : "danger";
+        $_SESSION['status'] = $result
+            ? "Booking Successfully Submitted!"
+            : "Booking Not Submitted! Something went wrong.";
     }
-    // Redirect to same page (GET request)
+
+    if (isset($_POST['update'])) {
+
+        $stmt = $pdo->prepare("UPDATE bookings SET
+            customer_name=?,
+            email=?,
+            phone=?,
+            check_in=?,
+            check_out=?,
+            room_type=?,
+            guests=?,
+            message=?
+            WHERE id=?");
+
+        $result = $stmt->execute([
+            $_POST['name'],
+            $_POST['email'],
+            $_POST['phone'],
+            $_POST['check_in'],
+            $_POST['check_out'],
+            $_POST['room_type'],
+            $_POST['guests'],
+            $_POST['message'],
+            $_POST['id']
+        ]);
+
+        $_SESSION['alert_type'] = $result ? "info" : "danger";
+        $_SESSION['status'] = $result
+            ? "Booking Updated Successfully!"
+            : "Update Failed! Please try again.";
+    }
+
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
 
-// Retrivig session variables
+/* ================= FETCH EDIT DATA ================= */
+$editBooking = null;
+if (isset($_GET['edit'])) {
+    $stmt = $pdo->prepare("SELECT * FROM bookings WHERE id=?");
+    $stmt->execute([$_GET['edit']]);
+    $editBooking = $stmt->fetch();
+}
+
+/* ================= SESSION ALERT ================= */
 $status = $_SESSION['status'] ?? '';
-unset($_SESSION['status']);
 $alert_type = $_SESSION['alert_type'] ?? '';
-unset($_SESSION['alert_type']);
+unset($_SESSION['status'], $_SESSION['alert_type']);
 
-$bookings = $pdo->query("SELECT * FROM bookings")->fetchAll();
+/* ================= FETCH ALL BOOKINGS ================= */
+$bookings = $pdo->query("SELECT * FROM bookings ORDER BY id DESC")->fetchAll();
 ?>
-<?php if (isset($status)): ?>
-    <!-- Bootstrap 5 Alert with Close Button -->
-    <!-- Auto width based on content -->
-    <?php if ($alert_type === "success") {  ?>
-        <div class="alert alert-success alert-dismissible fade show d-inline-flex align-items-center" role="alert">
-            <?= htmlspecialchars($status); ?>
-            <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+
+<!-- <div class="container my-5 px-4"> -->
+<div class="container my-1 px-0">
+    <?php if ($status): ?>
+        <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($status) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    <?php } else if ($alert_type === "error") { ?>
-        <div class="alert alert-danger alert-dismissible fade show d-inline-flex align-items-center" role="alert">
-            <?= htmlspecialchars($status); ?>
-            <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+    <?php endif; ?>
+
+    <div class="card shadow-lg mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><?= $editBooking ? 'Edit Bookings' : 'Manage Bookings' ?></h4>
         </div>
-    <?php } ?>
+        <div class="card-body">
+            <form method="POST" class="row g-3 mb-4">
+                <input type="hidden" name="id" value="<?= $editBooking['id'] ?? '' ?>">
 
-<?php endif; ?>
+                <div class="col-md-3">
+                    <!-- <input class="form-control" name="name" placeholder="Guest Name"
+                        value="<?= $editBooking['customer_name'] ?? '' ?>" required> -->
+                    <label class="form-label"><b>Name</b></label>
+                    <input type="text" name="name" placeholder="Name" class="form-control"
+                        value="<?= $editBooking['customer_name'] ?? '' ?>" required>
+                </div>
 
-<h3>Manage Bookings</h3>
+                <div class="col-md-3">
+                    <!-- <input class="form-control" name="email" placeholder="Email"
+                        value="<?= $editBooking['email'] ?? '' ?>" required> -->
+                    <label class="form-label"><b>Email</b></label>
+                    <input type="text" name="email" placeholder="email" class="form-control"
+                        value="<?= $editBooking['email'] ?? '' ?>" required>
+                </div>
 
-<form method="POST">
-    <div>
-        <input name="name" placeholder="Guest Name">
-        <input name="email" placeholder="Email Address">
-        <input name="phone" placeholder="Phone Number">
+                <div class="col-md-2">
+                    <!-- <input class="form-control" name="phone" placeholder="Phone" -->
+                    <label class="form-label"><b>Phone</b></label>
+                    <input type="text" name="phone" placeholder="phone" class="form-control"
+                        value="<?= $editBooking['phone'] ?? '' ?>" required>
+                </div>
 
-        <!-- <input name="check_in" placeholder="Check-in"> -->
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Check-in</label>
-        <input type="date" id="checkIn" name="check_in" required class="w-full p-4 rounded-lg bg-gray-50 text-gray-800 focus:bg-white custom-input cursor-pointer hover:bg-gray-100">
+                <div class="col-md-2">
+                    <!-- <input type="date" class="form-control" name="check_in"
+                        value="<?= $editBooking['check_in'] ?? '' ?>" required> -->
+                    <label class="form-label"><b>Check_in</b></label>
+                    <input type="date" name="check_in" placeholder="check_in" class="form-control"
+                        value="<?= $editBooking['check_in'] ?? '' ?>" required>
+                </div>
 
-        <!-- <input name="check_out" placeholder="Check-out"> -->
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Check-out</label>
-        <input type="date" id="checkOut" name="check_out" required class="w-full p-4 rounded-lg bg-gray-50 text-gray-800 focus:bg-white custom-input cursor-pointer hover:bg-gray-100">
-   </div>
+                <div class="col-md-2">
+                    <!-- <input type="date" class="form-control" name="check_out"
+                        value="<?= $editBooking['check_out'] ?? '' ?>" required> -->
+                    <label class="form-label"><b>Check_out</b></label>
+                    <input type="date" name="check_in" placeholder="check_out" class="form-control"
+                        value="<?= $editBooking['check_out'] ?? '' ?>" required>
+                </div>
 
-    <?php echo "<br>"; ?>
+                <div class="col-md-2">
+                    <!-- <input class="form-control" name="room_type" placeholder="Room"
+                        value="<?= $editBooking['room_type'] ?? '' ?>" required> -->
+                    <label class="form-label"><b>Type</b></label>
+                    <input type="text" name="room_type" placeholder="type" class="form-control"
+                        value="<?= $editBooking['room_type'] ?? '' ?>" required>
+                </div>
 
-    <div>
-        <select id="roomSelect" name="room_type">
-            <option value="Garden Suite">Garden Suite</option>
-            <option value="Royal Loft">Royal Loft</option>
-            <option value="Grand Villa">Grand Villa</option>
-        </select>
-        <i data-lucide="bed-double" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-gold transition-colors"></i>
-        <label class="floating-label group-focus-within:-translate-y-8 text-xs uppercase tracking-widest">Select Room</label>
+                <div class="col-md-2">
+                    <!-- <input class="form-control" name="guests" placeholder="Guests"
+                        value="<?= $editBooking['guests'] ?? '' ?>" required> -->
+                    <label class="form-label"><b>Guests</b></label>
+                    <input type="text" name="guests" placeholder="guests" class="form-control"
+                        value="<?= $editBooking['guests'] ?? '' ?>" required>
+                </div>
 
-        <select id="guests" name="guests">
-            <option value="1">1 Guest</option>
-            <option value="2">2 Guests</option>
-            <option value="3">3 Guests</option>
-            <option value="4+">4+ Guests</option>
-        </select>
-        <i data-lucide="users" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-gold transition-colors"></i>
-        <label class="floating-label group-focus-within:-translate-y-8 text-xs uppercase tracking-widest">Guests</label>
+                <div class="col-md-4">
+                    <!-- <input class="form-control" name="message" placeholder="Message"
+                        value="<?= $editBooking['message'] ?? '' ?>"> -->
+                    <label class="form-label"><b>Message</b></label>
+                    <input type="text" name="message" placeholder="message" class="form-control"
+                        value="<?= $editBooking['message'] ?? '' ?>" required>
+                </div>
+
+<div class="col-md-3">
+    <?php if ($editBooking): ?>
+        <div class="d-flex gap-2">
+            <button class="btn btn-warning flex-fill" name="update">
+                Update
+            </button>
+
+            <a href="<?= $_SERVER['PHP_SELF'] ?>" 
+               class="btn btn-secondary flex-fill">
+                Cancel
+            </a>
+        </div>
+    <?php else: ?>
+        <button class="btn btn-success w-100" name="add">
+            Add
+        </button>
+    <?php endif; ?>
+</div>            </form>
+        </div>
     </div>
 
-    <div>
-        <?php echo "<br>"; ?>
+    <hr>
 
-        <!-- Message Area -->
-        <div class="relative group">
-            <textarea id="message" name="message" rows="4" placeholder="Special Requests or Dietary Needs..." class="custom-input w-full pl-12 pr-4 py-4 rounded-lg bg-gray-50 text-gray-800 focus:bg-white resize-none"></textarea>
-            <i data-lucide="message-square" class="absolute left-4 top-4 text-gray-400 pointer-events-none group-focus-within:text-gold transition-colors"></i>
-            <label class="floating-label group-focus-within:-translate-y-8 text-xs uppercase tracking-widest">Requests</label>
+    <div class="card shadow-lg">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">All Bookings</h4>
         </div>
 
-        <?php echo "<br>"; ?>
-
-        <button name="add">Add Booking</button>
-    </div>
-
-</form>
-
-<hr>
-
-<!-- <?php foreach ($bookings as $booking): ?>
-<p><?= $booking['customer_name'] ?> - $<?= $booking['email'] ?></p>
-<?php endforeach; ?> -->
-
-<!-- <hr class="my-4"> -->
-
-<div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">All Bookings</h5>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle mb-0">
-            <thead class="table-primary">
-                <tr>
-                    <th>#</th>
-                    <th>Guest</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Room</th>
-                    <th>Guests</th>
-                    <th>Check-in</th>
-                    <th>Check-out</th>
-                    <th>Message</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (count($bookings) > 0): ?>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th>#</th>
+                        <th>Guest</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Type</th>
+                        <th>Guests</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Message</th>
+                        <th width="150">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
                     <?php foreach ($bookings as $index => $booking): ?>
                         <tr>
                             <td><?= $index + 1 ?></td>
@@ -165,18 +232,20 @@ $bookings = $pdo->query("SELECT * FROM bookings")->fetchAll();
                             <td><?= htmlspecialchars($booking['check_in']) ?></td>
                             <td><?= htmlspecialchars($booking['check_out']) ?></td>
                             <td><?= htmlspecialchars($booking['message']) ?></td>
+                            <td>
+                                <a href="?edit=<?= $booking['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="?delete=<?= $booking['id'] ?>"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Delete this booking?')">
+                                    Delete
+                                </a>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="9" class="text-center text-muted py-4">
-                            No bookings found.
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
+</div> <!-- End Container -->
 <?php include '../includes/footer.php'; ?>

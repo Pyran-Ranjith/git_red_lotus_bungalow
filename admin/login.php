@@ -1,33 +1,64 @@
 <?php
-require '../config/database.php';
-include '../includes/header.php';
-include '../includes/navbar.php';
-session_start();
+session_start(); // MUST be first
+
 require '../config/database.php';
 
-if($_SERVER["REQUEST_METHOD"]=="POST"){
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE username=?");
-    $stmt->execute([$_POST['username']]);
-    $user = $stmt->fetch();
-// echo $user['password'];
-// echo $_POST['password'];
-// To create a new hash:
+// If already logged in → redirect
+if (!empty($_SESSION['admin'])) {
+    header("Location: dashboard.php");
+    exit();
+}
 
-    if($user && password_verify($_POST['password'], $user['password'])){
-        $_SESSION['admin'] = $user['username'];
-        header("Location: dashboard.php");
-        exit;
+$error = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    $username = trim($_POST['username'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+
+    if ($username && $password) {
+
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user && password_verify($password, $user['password'])) {
+
+            // ✅ Store admin session properly
+            $_SESSION['admin'] = true;
+            $_SESSION['admin_username'] = $user['username'];
+            $_SESSION['admin_id'] = $user['id'];
+
+            header("Location: dashboard.php");
+            exit();
+
+        } else {
+            $error = "Invalid Username or Password";
+        }
+
     } else {
-        echo "<div class='alert alert-danger'>Invalid Login</div>";
+        $error = "Please fill all fields";
     }
 }
+
+include '../includes/header.php';
+include '../includes/navbar.php';
 ?>
 
-<form method="POST" class="container mt-5 col-md-4">
-    <h3>Admin Login</h3>
-    <input name="username" class="form-control mb-2" placeholder="Username">
-    <input name="password" type="password" class="form-control mb-2" placeholder="Password">
-    <button class="btn btn-danger w-100">Login</button>
-</form>
+<div class="container mt-5 col-md-4">
+    <h3 class="mb-3">Admin Login</h3>
+
+    <?php if ($error): ?>
+        <div class="alert alert-danger">
+            <?= htmlspecialchars($error) ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="POST">
+        <input name="username" class="form-control mb-3" placeholder="Username" required>
+        <input name="password" type="password" class="form-control mb-3" placeholder="Password" required>
+        <button class="btn btn-danger w-100">Login</button>
+    </form>
+</div>
 
 <?php include '../includes/footer.php'; ?>

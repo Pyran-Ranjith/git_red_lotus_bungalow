@@ -1,13 +1,9 @@
 <?php
 include '../includes/header.php';
 include '../includes/navbar.php';
-session_start();
+include '../includes/load.php';
+/* ------------Process begin here ------------------------------- */
 require '../config/database.php';
-
-if(!isset($_SESSION['admin'])){
-    header("Location: login.php");
-    exit;
-}
 
 $totalRooms = $pdo->query("SELECT COUNT(*) FROM rooms")->fetchColumn();
 $totalBookings = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 19, 2026 at 03:11 AM
+-- Generation Time: Feb 22, 2026 at 11:39 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -52,7 +52,9 @@ INSERT INTO `bookings` (`id`, `customer_name`, `email`, `phone`, `room_id`, `che
 (2, 'Nadeesha Perera', 'nadeesha@example.com', '0719876543', 2, '2026-03-10', '2026-03-12', 500.00, 'Pending', NULL, 1, NULL, '2026-02-14 09:05:04'),
 (3, 'Michael Fernando', 'michael@example.com', '0754567890', 3, '2026-04-01', '2026-04-07', 1080.00, 'Cancelled', NULL, 1, NULL, '2026-02-14 09:05:04'),
 (4, 'Mahi Jayawardana', 'mahi@gmail.com', '0718111800', 2, '2026-02-18', '2026-02-20', NULL, 'Pending', NULL, 1, NULL, '2026-02-16 01:56:25'),
-(37, 'test', 'test@gmail.com', '11111111', NULL, '2026-02-19', '2026-02-21', NULL, 'Pending', 'Grand Villa', 3, 'Please confirm this booking', '2026-02-19 02:06:36');
+(37, 'test', 'test@gmail.com', '11111111', NULL, '2026-02-19', '2026-02-21', NULL, 'Pending', 'Grand Villa', 3, 'Please confirm this booking', '2026-02-19 02:06:36'),
+(38, 'test1', 'test-1@gmail.com', '444444', NULL, '2026-02-19', '2026-02-20', NULL, 'Pending', '2', 2, 'Please confrm', '2026-02-19 02:40:18'),
+(39, 'test1', 'test-1@gmail.com', '444444', NULL, '2026-02-19', '2026-02-20', NULL, 'Pending', '2', 2, 'Please confrm', '2026-02-19 02:40:18');
 
 -- --------------------------------------------------------
 
@@ -67,6 +69,29 @@ CREATE TABLE `contacts` (
   `message` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pgm_parameters`
+--
+
+CREATE TABLE `pgm_parameters` (
+  `id` int(11) NOT NULL,
+  `param_key` varchar(100) NOT NULL,
+  `param_value` tinyint(1) NOT NULL DEFAULT 0,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `pgm_parameters`
+--
+
+INSERT INTO `pgm_parameters` (`id`, `param_key`, `param_value`, `updated_at`) VALUES
+(1, 'maintenance_popup', 0, '2026-02-22 06:05:47'),
+(2, 'maintenance_alert', 0, '2026-02-22 06:30:01'),
+(3, 'notice_popup', 1, '2026-02-22 07:10:00'),
+(4, 'notice_alert', 0, '2026-02-22 07:10:00');
 
 -- --------------------------------------------------------
 
@@ -135,6 +160,13 @@ ALTER TABLE `contacts`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `pgm_parameters`
+--
+ALTER TABLE `pgm_parameters`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `param_key` (`param_key`);
+
+--
 -- Indexes for table `rooms`
 --
 ALTER TABLE `rooms`
@@ -155,13 +187,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `contacts`
 --
 ALTER TABLE `contacts`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `pgm_parameters`
+--
+ALTER TABLE `pgm_parameters`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `rooms`

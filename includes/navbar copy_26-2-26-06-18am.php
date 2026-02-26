@@ -16,6 +16,11 @@
   </nav>
 </noscript>
 
+<?php if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+?>
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
   <div class="container">
 
@@ -23,15 +28,7 @@
       Red Lotus Bungalow
     </a>
 
-
     <div class="ms-auto">
-
-
-
-<?php if (session_status() === PHP_SESSION_NONE) {
-  session_start();
-}
-?>
 <!-- <?php echo $_SESSION['admin_username']; ?> -->
       <?php if (isset($_SESSION['admin']) && $_SESSION['admin_username'] === 'admin') { ?>
 

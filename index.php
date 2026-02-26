@@ -1,3 +1,76 @@
+<?php
+// ============================================
+// 3️⃣ LOAD PARAMETERS TO SESSION (config.php)
+// ============================================
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once "./config/database.php"; // PDO connection
+
+try {
+
+    $stmt = $pdo->prepare("SELECT param_key, param_value FROM pgm_parameters");
+    $stmt->execute();
+    $params = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($params as $row) {
+        $_SESSION[$row['param_key']] = (bool)$row['param_value'];
+    }
+
+} catch (PDOException $e) {
+    die("Parameter Load Error: " . $e->getMessage());
+}
+
+$maintenance_popup = false; // change to false when live
+$maintenance_alert = false; // change to false when live
+$notice_poup = false; // turn ON / OFF
+$notice_alert = false; // turn ON / OFF
+
+// ============================================
+// 4️⃣ USAGE ANYWHERE IN PROJECT
+// ============================================
+
+if (!empty($_SESSION['maintenance_popup'])) {
+    // include("maintenance_popup.php");
+    $maintenance_popup = $_SESSION['maintenance_popup'];
+}
+
+if (!empty($_SESSION['maintenance_alert'])) {
+    // include("maintenance_alert.php");
+    $maintenance_alert = $_SESSION['maintenance_alert'];
+}
+
+if (!empty($_SESSION['notice_popup'])) {
+    // include("notice_modal.php");
+    $notice_popup = $_SESSION['notice_popup'];
+}
+
+if (!empty($_SESSION['notice_alert'])) {
+    // include("notice_alert.php");
+    $notice_alert = $_SESSION['notice_alert'];
+}
+
+if ($maintenance_popup) {
+    header("HTTP/1.1 503 Service Unavailable");
+    include("maintenance_popup.php");
+    exit();
+} elseif ($maintenance_alert) {
+    header("HTTP/1.1 503 Service Unavailable");
+    include("maintenance_alert.php");
+    exit();
+} elseif ($notice_alert){
+    include("notice_alert.php");
+} else {
+    /*
+        } elseif ($notice_poup){
+        tis option not working hence placed it under else
+    */
+    include("notice_modal.php");
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -155,9 +228,9 @@
              <a href="./booking_front.php" target="_blank" class="bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-2.5 rounded-none font-bold text-sm hover:from-gold hover:to-goldDark hover:text-white transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest">
                BOOK NOW
             </a>
-             <a href="./admin/dashboard.php" target="_blank" class="bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-2.5 rounded-none font-bold text-sm hover:from-gold hover:to-goldDark hover:text-white transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest">
+             <!-- <a href="./admin/dashboard.php" target="_blank" class="bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-2.5 rounded-none font-bold text-sm hover:from-gold hover:to-goldDark hover:text-white transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest">
                Admin
-            </a>
+            </a> -->
         </div>
     </header>
 
@@ -240,7 +313,8 @@
             </div>
         </section>
 
-        <!-- ROOMS SECTION -->
+        <!-- ROOMS SECTION My-->
+<noscript>
         <section id="rooms" class="py-24 bg-[#F8F8F8]">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16">
@@ -286,9 +360,15 @@ $rooms = $stmt->fetchAll();
                             <p class="text-gray-500 text-sm mb-4 flex-grow">   <?= $room['description'] ?>.</p>
                             
 
-                            <button onclick="openRoomDetails('Garden Suite')" class="mt-auto w-full border border-gray text-black hover:bg-black hover:text-gold transition-colors py-3 uppercase text-xs font-bold tracking-[0.2em] flex items-center justify-center gap-2 group-hover:shadow-lg">
+                            <!-- <button href="./rooms_detais_front.php?id=<?= $room['id'] ?>" onclick="openRoomDetails('Garden Suite')" class="mt-auto w-full border border-gray text-black hover:bg-black hover:text-gold transition-colors py-3 uppercase text-xs font-bold tracking-[0.2em] flex items-center justify-center gap-2 group-hover:shadow-lg">
                                 View Details
-                            </button>
+                            </button> -->
+             <a href="./rooms_detais_front.php?id=<?= $room['id'] ?>" target="_blank" class="bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-2.5 rounded-none font-bold text-sm hover:from-gold hover:to-goldDark hover:text-white transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest">
+               View DetailsSS
+            </a>
+                            <!-- <a href="./booking_front.php" target="_blank" class="bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-2.5 rounded-none font-bold text-sm hover:from-gold hover:to-goldDark hover:text-white transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest">
+                            View Details
+                            </a> -->
                         </div>
                         <div class="w-0.5 h-[4px] bg-gold mx-auto mt-6 group-hover:w-full transition-all duration-500 ease-in-out mb-1"></div>
 
@@ -297,11 +377,75 @@ $rooms = $stmt->fetchAll();
 
 
 <?php endforeach; ?>
+            </div>
+        </section>
+</noscript>
+
+<!-- ROOMS SECTION Chtgpt-->
+<section id="rooms" class="py-24 bg-[#F8F8F8]">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="font-kugile text-4xl md:text-5xl text-richBlack mb-4">Your Sanctuary</h2>
+            <div class="flex items-center justify-center gap-4">
+                <div class="w-12 h-[1px] bg-gold"></div>
+                <div class="text-lotusRed font-kugile text-xl">❦</div>
+                <div class="w-12 h-[1px] bg-gold"></div>
+            </div>
+        </div>
+
+<?php
+require './config/database.php';
+$stmt = $pdo->query("SELECT * FROM rooms WHERE status='Available'");
+$rooms = $stmt->fetchAll();
+?>
+
+        <div class="flex flex-col gap-12">
+
+<?php foreach($rooms as $room): ?>
+
+            <div class="flex flex-col md:flex-row bg-white rounded-lg shadow-lg hover:shadow-gold border-2 border-transparent transition-all duration-300 group overflow-hidden">
+
+                <!-- Image -->
+                <div class="relative md:w-1/2 h-72 md:h-auto overflow-hidden">
+                    <img src="<?= $room['image'] ?>" 
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                         alt="<?= $room['name'] ?>">
+                    <div class="absolute top-4 right-4 bg-white text-richBlack font-bold px-3 py-1 text-xs uppercase tracking-wider rounded-sm">
+                        Rs. <?= $room['price'] ?>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="md:w-1/2 p-8 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-kugile text-3xl text-richBlack mb-4">
+                            <?= $room['name'] ?>
+                        </h3>
+                        <p class="text-gray-500 text-sm mb-6">
+                            <?= $room['description'] ?>
+                        </p>
+                    </div>
+
+                    <a href="./rooms_detais_front.php?id=<?= $room['id'] ?>" 
+                       target="_blank"
+                       class="inline-block bg-gradient-to-r from-lotusRed to-lotusDark text-white px-8 py-3 font-bold text-sm hover:from-gold hover:to-goldDark transition-all transform hover:-translate-y-1 shadow-lg border border-gold/50 tracking-widest">
+                        View Details
+                    </a>
+                </div>
+
+            </div>
+
+<?php endforeach; ?>
+
+        </div>
+
+    </div>
+</section>
 
 
 
 <noscript>
-                <!-- ROOM GRID -->
+                <!-- ROOM GRID  In activate-->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     
                     <!-- CARD 1: GARDEN SUITE -->

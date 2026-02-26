@@ -2,8 +2,18 @@
     <!-- Connecting mysql database and gettig rooms tabel data -->
     <?php
     require './config/database.php';
-    $stmt = $pdo->query("SELECT * FROM rooms WHERE status='Available'");
+    
+    $id = 0;
+    if(isset($_GET['id'])){
+        $id = $_GET['id'];
+    }
+    
+    $stmt = $pdo->query("SELECT * FROM rooms WHERE status='Available' and id=$id");
     $rooms = $stmt->fetchAll();
+    foreach($rooms as $room): 
+        $room = $room['image'];
+    endforeach;
+
     ?>
 
     <!-- Tailwind CSS -->
@@ -80,14 +90,21 @@
                 
                 <!-- Image Card -->
                 <div class="relative rounded-xl overflow-hidden shadow-gold max-w-sm mx-auto border-2 border-white/20">
-                    <img src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=2670&auto=format&fit=crop" alt="Room" class="w-full h-64 object-cover" />
+                    <!-- <img src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=2670&auto=format&fit=crop" alt="Room" class="w-full h-64 object-cover" /> -->
+                            <?php foreach($rooms as $room): ?>
+                                <!-- <option value="<?= $room['id']; ?>"> -->
+                                    <!-- <?= $room['name']; ?> -->
+                    <img src="<?= $room['image'] ?>" alt="<?= $room['name'] ?>(Image not found) " class="w-full h-64 object-cover" />
+                                <!-- </option> -->
+                            <?php endforeach; ?>
+                    <!-- <img src="<?= $room['image'] ?>" class="room-img w-full h-full object-cover transition-transform duration-700" alt="<?= $room['name'] ?>(Image not found) "> -->
                     <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <i data-lucide="heart" class="text-white w-12 h-12 fill-current"></i>
                     </div>
                 </div>
 
                 <!-- Why Book With Us List -->
-                <div class="mt-8 text-left space-y-4">
+                <!-- <div class="mt-8 text-left space-y-4">
                     <div class="flex items-start gap-3">
                         <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-gold shrink-0">
                             <i data-lucide="check-circle" class="w-4 h-4"></i>
@@ -106,7 +123,7 @@
                             <p class="text-sm text-gray-200">WhatsApp message sent instantly.</p>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -115,8 +132,8 @@
             <div class="w-full max-w-md">
                 
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl md:text-4xl font-kugile text-richBlack mb-2">Reservation Details</h1>
-                    <p class="text-gray-500 mb-8">Fill in the form below to secure your spot at Red Lotus.</p>
+                    <h1 class="text-3xl md:text-4xl font-kugile text-richBlack mb-2">Room Details</h1>
+                    <!-- <p class="text-gray-500 mb-8">Fill in the form below to secure your spot at Red Lotus.</p> -->
                 </div>
 
 <?php if(isset($_GET['parm_status'])): ?>
@@ -140,10 +157,39 @@
 
                     <!-- Name Field -->
                     <div class="relative group">
-                        <input type="text" id="fullName" name="name" required placeholder="Full Name" class="custom-input w-full pl-12 pr-4 py-4 rounded-lg bg-gray-50 text-gray-800 focus:bg-white placeholder-gray-400" />
-                        <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-gold transition-colors"></i>
-                        <label class="floating-label group-focus-within:-translate-y-8 text-xs uppercase tracking-widest">Guest Name</label>
+                        <input type="text" id="fullName" name="name" readonly placeholder="" value="<?= $room['name'] ?>" class="custom-input w-full pl-12 pr-4 py-4 rounded-lg bg-gray-50 text-gray-800 focus:bg-white placeholder-gray-400" />
+                        <i data-lucide="room" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-gold transition-colors"></i>
+                        <label class="floating-label group-focus-within:-translate-y-8 text-xs uppercase tracking-widest">Name</label>
                     </div>
+
+                    <!-- Type Field -->
+                    <div class="relative group">
+                        <input type="text" id="type" name="type" readonly placeholder="" value="<?= $room['type'] ?>" class="custom-input w-full pl-12 pr-4 py-4 rounded-lg bg-gray-50 text-gray-800 focus:bg-white placeholder-gray-400" />
+                        <i data-lucide="type" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-gold transition-colors"></i>
+                        <label class="floating-label group-focus-within:-translate-y-8 text-xs uppercase tracking-widest">Type</label>
+                    </div>
+
+                    <!-- Price Field -->
+                    <div class="relative group">
+                        <input type="text" id="type" name="price" readonly placeholder="" value="Rs.<?= $room['price'] ?>" class="custom-input w-full pl-12 pr-4 py-4 rounded-lg bg-gray-50 text-gray-800 focus:bg-white placeholder-gray-400" />
+                        <i data-lucide="price" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-gold transition-colors"></i>
+                        <label class="floating-label group-focus-within:-translate-y-8 text-xs uppercase tracking-widest">Price</label>
+                    </div>
+ 
+                    <!-- Description Field -->
+                    <div class="relative group">
+                        <input type="text" id="description" name="description" readonly placeholder="" value="<?= $room['description'] ?>" class="custom-input w-full pl-12 pr-4 py-4 rounded-lg bg-gray-50 text-gray-800 focus:bg-white placeholder-gray-400" />
+                        <i data-lucide="description" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-gold transition-colors"></i>
+                        <label class="floating-label group-focus-within:-translate-y-8 text-xs uppercase tracking-widest">Description</label>
+                    </div>
+ 
+                    <!-- Status Field -->
+                    <div class="relative group">
+                        <input type="text" id="status" name="status" readonly placeholder="" value="<?= $room['status'] ?>" class="custom-input w-full pl-12 pr-4 py-4 rounded-lg bg-gray-50 text-gray-800 focus:bg-white placeholder-gray-400" />
+                        <i data-lucide="status" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-gold transition-colors"></i>
+                        <label class="floating-label group-focus-within:-translate-y-8 text-xs uppercase tracking-widest">Status</label>
+                    </div>
+               <noscript>
 
                     <!-- Email Field -->
                     <div class="relative group">
@@ -220,6 +266,7 @@
                         <span id="btnText">Confirm Booking</span>
                         <i data-lucide="check-circle" class="w-5 h-5"></i>
                     </button>
+                </noscript>
 
                     <!-- Back Link -->
                     <div class="text-center mt-6">
