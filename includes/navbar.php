@@ -1,7 +1,7 @@
 <noscript>
   <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
     <div class="container">
-      <a class="navbar-brand" href="">Red Lotus Bungalow</a>
+      <a class="navbar-brand"  href="dashboard.php" >Red Lotus Bungalow</a>
       <div>
         <?php if (isset($_SESSION['admin'])) { ?>
           <a class="nav-link d-inline text-white" href="manage_rooms.php">Rooms</a>
