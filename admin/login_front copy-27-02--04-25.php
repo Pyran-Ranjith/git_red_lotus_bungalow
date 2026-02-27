@@ -1,5 +1,5 @@
 <?php
-// include '../includes/load.php';
+include '../includes/load.php';
 /* ------------Process begin here ------------------------------- */
 require '../config/database.php';
 
@@ -327,7 +327,8 @@ require '../config/database.php';
 
 <body>
 
-    <!-- Navigation Bar -->
+<noscript>
+<!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.php" class="navbar-brand">
@@ -353,7 +354,7 @@ require '../config/database.php';
             </div>
         </div>
     </nav>
-
+</noscript>
     <!-- Main Content -->
     <main class="main-content">
 

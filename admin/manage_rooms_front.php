@@ -6,9 +6,6 @@ session_start();
 <?php
 /* ------------Process begin here ------------------------------- */
 require '../config/database.php';
-
-$totalRooms = $pdo->query("SELECT COUNT(*) FROM rooms")->fetchColumn();
-$totalBookings = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
 ?>
 
 <!DOCTYPE html>
@@ -17,9 +14,10 @@ $totalBookings = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Red Lotus Bungalow | Admin Dashboard</title>
+    <title>Red Lotus Bungalow | Admin manage_rooms</title>
     <!-- Using Google Fonts for a modern typography -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         /* --- CSS Reset & Base Variables --- */
@@ -334,7 +332,7 @@ $totalBookings = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.php" class="navbar-brand">
+            <a href="dashboard_front.php" class="navbar-brand">
                 <div class="brand-icon">❖</div>
                 Red Lotus Bungalow
             </a>
@@ -356,7 +354,7 @@ $totalBookings = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
                     <?php if ($_SESSION['user_name'] === 'admin') { ?>
                         <a href="dashboard_front.php" class="nav-link active">Dashboard</a>
                         <a href="manage_rooms_front.php" class="nav-link">Rooms</a>
-                        <a href="manage_bookings_front.php" class="nav-link">Bookings</a>
+                        <a href="manage_bookings.php" class="nav-link">Bookings</a>
                         <a href="logout.php" class="nav-link" style="background: rgba(0,0,0,0.2);">Logout</a>
                     <?php } else { ?>
                         <a href="login_front.php" class="nav-link" style="background: rgba(0,0,0,0.2);">Login</a>
@@ -372,118 +370,246 @@ $totalBookings = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
     <main class="main-content">
 
         <div class="welcome-header">
-            <h1><b>Admin Dashboard<b></h1>
-            <p>Welcome back, Administrator. Here is today's overview.</p>
+            <h1><b>Admin Manage Rooms<b></h1>
+            <p>Welcome back, Administrator room management. </p>
         </div>
 
-        <!-- Stats Section -->
-        <section class="stats-grid">
-            <!-- Total Rooms Card -->
-            <div class="stat-card">
-                <div class="stat-info">
-                    <h3>Total Rooms</h3>
-                    <div class="number"><?= $totalRooms ?></div>
+<?php
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+/* ================= DELETE ROOM ================= */
+if (isset($_GET['delete'])) {
+    $stmt = $pdo->prepare("DELETE FROM rooms WHERE id=?");
+    $stmt->execute([$_GET['delete']]);
+
+    $_SESSION['room_alert_type'] = "danger";
+    $_SESSION['room_status'] = "Room deleted successfully!";
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+/* ================= ADD / UPDATE ROOM ================= */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    if (isset($_POST['add'])) {
+        $stmt = $pdo->prepare("INSERT INTO rooms 
+            (name,price,description,type,status,capacity,image)
+            VALUES (?,?,?,?,?,?,?)");
+
+        $result = $stmt->execute([
+            $_POST['name'],
+            $_POST['price'],
+            $_POST['description'],
+            $_POST['type'],
+            $_POST['status'],
+            $_POST['capacity'],
+            $_POST['image']
+        ]);
+
+        $_SESSION['room_alert_type'] = $result ? "success" : "danger";
+        $_SESSION['room_status'] = $result
+            ? "Room Successfully Submitted!"
+            : "Room Not Submitted! Something went wrong.";
+    }
+
+    if (isset($_POST['update'])) {
+        $stmt = $pdo->prepare("UPDATE rooms SET
+            name=?,
+            price=?,
+            description=?,
+            type=?,
+            status=?,
+            capacity=?,
+            image=?
+            WHERE id=?");
+
+        $result = $stmt->execute([
+            $_POST['name'],
+            $_POST['price'],
+            $_POST['description'],
+            $_POST['type'],
+            $_POST['status'],
+            $_POST['capacity'],
+            $_POST['image'],
+            $_POST['id']
+        ]);
+
+        $_SESSION['room_alert_type'] = $result ? "info" : "danger";
+        $_SESSION['room_status'] = $result
+            ? "Room Updated Successfully!"
+            : "Update Failed! Please try again.";
+    }
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+/* ================= FETCH EDIT DATA ================= */
+$editRoom = null;
+if (isset($_GET['edit'])) {
+    $stmt = $pdo->prepare("SELECT * FROM rooms WHERE id=?");
+    $stmt->execute([$_GET['edit']]);
+    $editRoom = $stmt->fetch();
+}
+
+/* ================= SESSION ALERT ================= */
+$room_status = $_SESSION['room_status'] ?? '';
+$room_alert_type = $_SESSION['room_alert_type'] ?? '';
+unset($_SESSION['room_status'], $_SESSION['room_alert_type']);
+
+/* ================= FETCH ROOMS ================= */
+$rooms = $pdo->query("SELECT * FROM rooms ORDER BY id DESC")->fetchAll();
+?>
+
+<div class="container my-1 px-0">
+
+    <?php if ($room_status): ?>
+        <div class="alert alert-<?= $room_alert_type ?> alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($room_status); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <div class="card shadow-lg mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><?= $editRoom ? 'Edit Room' : 'Manage Rooms' ?></h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="row g-3">
+                <input type="hidden" name="id" value="<?= $editRoom['id'] ?? '' ?>">
+
+                <div class="col-md-4">
+                    <label class="form-label"><b>Name</b></label>
+                    <input type="text" name="name" placeholder="name" class="form-control"
+                        value="<?= $editRoom['name'] ?? '' ?>" required>
                 </div>
-                <div class="stat-icon">
-                    <!-- Bed Icon -->
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 12V8a2 2 0 00-2-2H6a2 2 0 00-2 2v4m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4m16 0a2 2 0 002-2v-4a2 2 0 00-2-2H6a2 2 0 00-2 2v4a2 2 0 002 2z" />
-                    </svg>
+
+                <div class="col-md-3">
+                    <label class="form-label"><b>Price</b></label>
+                    <input type="text" name="price" placeholder="price" class="form-control"
+                        value="<?= $editRoom['price'] ?? '' ?>" required>
                 </div>
-            </div>
 
-            <!-- Total Bookings Card -->
-            <div class="stat-card">
-                <div class="stat-info">
-                    <h3>Total Bookings</h3>
-                    <div class="number"><?= $totalBookings ?></div>
+                <div class="col-md-5">
+                    <label class="form-label"><b>Description</b></label>
+                    <input type="text" name="description" placeholder="description" class="form-control"
+                        value="<?= $editRoom['description'] ?? '' ?>" required>
                 </div>
-                <div class="stat-icon">
-                    <!-- Calendar Icon -->
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+
+                <div class="col-md-3">
+                    <label class="form-label"><b>Type</b></label>
+                    <input type="text" name="type" placeholder="type" class="form-control"
+                        value="<?= $editRoom['type'] ?? '' ?>" required>
                 </div>
-            </div>
-        </section>
 
-        <!-- Quick Actions Section -->
-        <section class="actions-section">
-            <h2 class="section-title">Management Actions</h2>
+                <div class="col-md-3">
+                    <label class="form-label"><b>Status</b></label>
+                    <input type="text" name="status" placeholder="status" class="form-control"
+                        value="<?= $editRoom['status'] ?? '' ?>" required>
+                </div>
 
-            <div class="actions-grid">
-                <!-- Manage Rooms -->
-                <a href="manage_rooms_front.php" class="action-card">
-                    <div class="action-icon">
-                        <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                    <div class="action-text">
-                        <h4>Manage Rooms</h4>
-                        <p>Add, edit, or remove room listings.</p>
-                        <a href="manage_rooms_front.php"></a><br>
+                <div class="col-md-3">
+                    <label class="form-label"><b>Capacity</b></label>
+                    <input type="text" name="capacity" placeholder="capacity" class="form-control"
+                        value="<?= $editRoom['capacity'] ?? '' ?>" required>
+                </div>
 
-                    </div>
-                </a>
+                <div class="col-md-3">
+                    <label class="form-label"><b>Image</b></label>
+                    <input type="text" name="image" placeholder="image" class="form-control"
+                        value="<?= $editRoom['image'] ?? '' ?>" required>
+                </div>
 
-                <!-- Manage Bookings -->
-                <a href="manage_bookings_front.php" class="action-card">
-                    <div class="action-icon">
-                        <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                        </svg>
-                    </div>
-                    <div class="action-text">
-                        <h4>Manage Bookings</h4>
-                        <p>View reservation details and status.</p>
-                        <a href="manage_bookings_front.php"></a><br>
-
-                    </div>
-                </a>
-
-                <!-- Logout (Styled as an action card for visibility) -->
-                <?php if (isset($_SESSION['admin'])) { ?>
-                    <a href="logout.php" class="action-card btn-logout">
-                    <?php } else { ?>
-                        <a href="login_front.php" class="action-card btn-login">
-                        <?php } ?>
-                        <div class="action-icon">
-                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                        </div>
-                        <div class="action-text">
-
-
-                        <?php if (isset($_SESSION['admin'])) { ?>
-                                <h4>Logout</h4>
-                            <?php } else { ?>
-                                <h4>Login</h4>
-                            <?php } ?>
-
-<noscript>
-                            <?php if (isset($_SESSION['admin'])) { ?>
-                    <?php if ($_SESSION['user_name'] === 'admin') { ?>
-                        <a href="dashboard_front.php" class="nav-link active">Dashboard</a>
-                        <a href="manage_rooms_front.php" class="nav-link">Rooms</a>
-                        <a href="manage_bookings_front.php" class="nav-link">Bookings</a>
-                        <a href="logout.php" class="nav-link" style="background: rgba(0,0,0,0.2);">Logout</a>
-                    <?php } else { ?>
-                        <a href="login_front.php" class="nav-link" style="background: rgba(0,0,0,0.2);">Login</a>
-                    <?php } ?>
-                <?php } else { ?>
-                    <a href="login_front.php" class="nav-link" style="background: rgba(0,0,0,0.2);">Login</a>
-                <?php } ?>
-</noscript>
-
-
-
-                            <p>Securely exit admin panel.</p>
-                        </div>
+                <!-- <div class="col-12 text-end">
+                    <?php if ($editRoom): ?>
+                        <button type="submit" name="update" class="btn btn-primary">
+                            Update Room
+                        </button>
+                        <a href="<?= $_SERVER['PHP_SELF'] ?>" class="btn btn-secondary">
+                            Cancel
                         </a>
+                    <?php else: ?>
+                        <button type="submit" name="add" class="btn btn-success">
+                            Add
+                        </button>
+                    <?php endif; ?>
+                </div> -->
+
+                <div class="col-md-2">
+                    <?php if ($editRoom): ?>
+                        <!-- <button class="btn btn-primary w-100" name="update">Update</button> -->
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-warning flex-fill" name="update">
+                                Update
+                            </button>
+
+                            <a href="<?= $_SERVER['PHP_SELF'] ?>"
+                                class="btn btn-secondary flex-fill">
+                                Cancel
+                            </a>
+                        </div>
+                    <?php else: ?>
+                        <button class="btn btn-success w-100" name="add">Add</button>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-lg">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">All Rooms</h4>
+        </div>
+
+        <div class="table-responsive">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Capacity</th>
+                            <th>Image</th>
+                            <th width="150">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($rooms as $index => $room): ?>
+                            <tr>
+                                <td><?= $index + 1 ?></td>
+                                <td><?= htmlspecialchars($room['name']) ?></td>
+                                <td><?= htmlspecialchars($room['price']) ?></td>
+                                <td><?= htmlspecialchars($room['description']) ?></td>
+                                <td><?= htmlspecialchars($room['type']) ?></td>
+                                <td><?= htmlspecialchars($room['status']) ?></td>
+                                <td><?= htmlspecialchars($room['capacity']) ?></td>
+                                <td><?= htmlspecialchars($room['image']) ?></td>
+                                <td>
+                                    <a href="?edit=<?= $room['id'] ?>"
+                                        class="btn btn-sm btn-warning">Edit</a>
+
+                                    <a href="?delete=<?= $room['id'] ?>"
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Delete this room?')">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
-        </section>
+        </div>
+    </div>
+
+</div>
 
     </main>
 

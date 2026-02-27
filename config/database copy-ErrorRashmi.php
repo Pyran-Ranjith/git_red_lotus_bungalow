@@ -1,18 +1,12 @@
 <?php
-// $prj_folder_extend_ = __DIR__;
-// if ($prj_folder_extend_ == 'C:\xampp\htdocs\git_red_lotus_bungalow\config') {
-//     /* Local */
-//     $hostname = "localhost";
-// } elseif ($prj_folder_extend_ == 'C:\xampp\htdocs\git_red_lotus_bungalow\config') {
-//     /* Local */
-//     $hostname = "localhost";
-// } else {
-//     /* Remote */
-//     $hostname = "localhost";
-// }
-
-$hostname = "localhost";
-// $hostname = "infinityfree";
+$prj_folder_extend_ = __DIR__;
+if ($prj_folder_extend_ == 'C:\xampp\htdocs\git_red_lotus_bungalow\config') {
+    /* Local */
+    $hostname = "localhost";
+} else {
+    /* Remote */
+    $hostname = "infinityfree";
+}
 
 //Db connection 
 if ($hostname == "localhost") {

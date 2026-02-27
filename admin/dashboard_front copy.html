@@ -1,27 +1,16 @@
-<?php
-// include '../includes/load.php';
-/* ------------Process begin here ------------------------------- */
-require '../config/database.php';
-
-// $totalRooms = $pdo->query("SELECT COUNT(*) FROM rooms")->fetchColumn();
-// $totalBookings = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
-?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Red Lotus Bungalow | Admin Dashboard</title>
     <!-- Using Google Fonts for a modern typography -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+    
     <style>
         /* --- CSS Reset & Base Variables --- */
         :root {
-            --primary-red: #D32F2F;
-            /* Deep Red matching your brand */
+            --primary-red: #D32F2F; /* Deep Red matching your brand */
             --primary-red-hover: #B71C1C;
             --accent-gold: #FFC107;
             --text-dark: #333333;
@@ -52,7 +41,7 @@ require '../config/database.php';
         .navbar {
             background-color: var(--primary-red);
             padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -156,7 +145,7 @@ require '../config/database.php';
             margin-bottom: 40px;
         }
 
-        .stat-card {
+      .stat-card {
             background: var(--white);
             padding: 30px;
             border-radius: var(--radius);
@@ -190,8 +179,7 @@ require '../config/database.php';
         .stat-icon {
             width: 60px;
             height: 60px;
-            background-color: #FFF0F0;
-            /* Light red bg */
+            background-color: #FFF0F0; /* Light red bg */
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -269,7 +257,7 @@ require '../config/database.php';
             background-color: #ffebee;
             color: #d32f2f;
         }
-
+        
         .btn-logout:hover {
             background-color: #ffcdd2;
         }
@@ -290,10 +278,9 @@ require '../config/database.php';
             .navbar {
                 padding: 1rem;
             }
-
+            
             .nav-menu {
-                display: none;
-                /* Hidden by default on mobile */
+                display: none; /* Hidden by default on mobile */
                 flex-direction: column;
                 position: absolute;
                 top: 100%;
@@ -301,13 +288,13 @@ require '../config/database.php';
                 width: 100%;
                 background-color: var(--primary-red);
                 padding: 20px;
-                box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 10px 10px rgba(0,0,0,0.1);
             }
 
             .nav-menu.active {
                 display: flex;
             }
-
+            
             .nav-link {
                 width: 100%;
                 text-align: center;
@@ -317,14 +304,13 @@ require '../config/database.php';
             .menu-toggle {
                 display: block;
             }
-
+            
             .stat-info .number {
                 font-size: 2rem;
             }
         }
     </style>
 </head>
-
 <body>
 
     <!-- Navigation Bar -->
@@ -334,7 +320,7 @@ require '../config/database.php';
                 <div class="brand-icon">❖</div>
                 Red Lotus Bungalow
             </a>
-
+            
             <!-- Mobile Menu Icon -->
             <div class="menu-toggle" onclick="toggleMenu()">
                 ☰
@@ -342,34 +328,29 @@ require '../config/database.php';
 
             <!-- Nav Links -->
             <div class="nav-menu" id="navMenu">
-                <?php if (isset($_SESSION['admin']) && $_SESSION['admin_username'] === 'admin') { ?>
-                    <a href="dashboard.php" class="nav-link active">Dashboard</a>
-                    <a href="manage_rooms.php" class="nav-link">Rooms</a>
-                    <a href="manage_bookings.php" class="nav-link">Bookings</a>
-                    <a href="logout.php" class="nav-link" style="background: rgba(0,0,0,0.2);">Logout</a>
-                <?php } else { ?>
-                    <a href="login_front.php" class="nav-link" style="background: rgba(0,0,0,0.2);">Login</a>
-                <?php } ?>
+                <a href="dashboard.php" class="nav-link active">Dashboard</a>
+                <a href="manage_rooms.php" class="nav-link">Rooms</a>
+                <a href="manage_bookings.php" class="nav-link">Bookings</a>
+                <a href="logout.php" class="nav-link" style="background: rgba(0,0,0,0.2);">Logout</a>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
     <main class="main-content">
-
+        
         <div class="welcome-header">
-            <h1>Login</h1>
-            <p>Welcome back.</p>
+            <h1>Admin Dashboard</h1>
+            <p>Welcome back, Administrator. Here is today's overview.</p>
         </div>
 
-<noscript>
         <!-- Stats Section -->
         <section class="stats-grid">
             <!-- Total Rooms Card -->
             <div class="stat-card">
                 <div class="stat-info">
                     <h3>Total Rooms</h3>
-                    <div class="number"><?= $totalRooms ?></div>
+                    <div class="number">4</div>
                 </div>
                 <div class="stat-icon">
                     <!-- Bed Icon -->
@@ -383,7 +364,7 @@ require '../config/database.php';
             <div class="stat-card">
                 <div class="stat-info">
                     <h3>Total Bookings</h3>
-                    <div class="number"><?= $totalBookings ?></div>
+                    <div class="number">7</div>
                 </div>
                 <div class="stat-icon">
                     <!-- Calendar Icon -->
@@ -397,7 +378,7 @@ require '../config/database.php';
         <!-- Quick Actions Section -->
         <section class="actions-section">
             <h2 class="section-title">Management Actions</h2>
-
+            
             <div class="actions-grid">
                 <!-- Manage Rooms -->
                 <a href="manage_rooms.php" class="action-card">
@@ -409,8 +390,6 @@ require '../config/database.php';
                     <div class="action-text">
                         <h4>Manage Rooms</h4>
                         <p>Add, edit, or remove room listings.</p>
-                        <a href="manage_rooms.php"></a><br>
-
                     </div>
                 </a>
 
@@ -424,37 +403,23 @@ require '../config/database.php';
                     <div class="action-text">
                         <h4>Manage Bookings</h4>
                         <p>View reservation details and status.</p>
-                        <a href="manage_bookings.php"></a><br>
-
                     </div>
                 </a>
 
                 <!-- Logout (Styled as an action card for visibility) -->
-                <!-- <a href="logout.php" class="action-card btn-logout"> -->
-
-                <?php if (isset($_SESSION['admin']) && $_SESSION['admin_username'] === 'admin') { ?>
                 <a href="logout.php" class="action-card btn-logout">
-                <?php } else { ?>
-                <a href="logout.php" class="action-card btn-login">
-                <?php } ?>
                     <div class="action-icon">
                         <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                     </div>
                     <div class="action-text">
-                        <!-- <h4>Logout</h4> -->
-                <?php if (isset($_SESSION['admin']) && $_SESSION['admin_username'] === 'admin') { ?>
                         <h4>Logout</h4>
-                <?php } else { ?>
-                        <h4>Login</h4>
-                <?php } ?>
                         <p>Securely exit admin panel.</p>
                     </div>
                 </a>
             </div>
         </section>
-</noscript>
 
     </main>
 
@@ -471,5 +436,4 @@ require '../config/database.php';
         }
     </script>
 </body>
-
 </html>
